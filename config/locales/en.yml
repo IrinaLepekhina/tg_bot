@@ -30,7 +30,7 @@
 # available at https://guides.rubyonrails.org/i18n.html.
 
 en:
-  telegram_webhooks:
+  telegram_muul_webhooks:
     action_missing:
       command: Can not perform %{command}
     callback_query:

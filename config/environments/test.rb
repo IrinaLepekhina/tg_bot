@@ -62,5 +62,8 @@ Rails.application.configure do
   config.telegram_updates_controller.session_store = :memory_store
 
   # Stub clients before processing routes.rb.
+  Telegram.reset_bots
   Telegram::Bot::ClientStub.stub_all!
+
+  config.hosts << "www.example.com"
 end

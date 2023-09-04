@@ -1,4 +1,42 @@
-RSpec.describe TelegramWebhooksController, telegram_bot: :rails do
+require 'rails_helper'
+
+RSpec.describe TelegramMuulWebhooksController, telegram_bot: :rails do
+  before do
+    allow(Telegram).to receive(:bot).and_return(Telegram.bots[:muul])
+  end
+  let(:bot_id)  { 'muul' }
+
+  describe '#message' do
+    let(:message_content) { 'Good date' }
+    
+
+    let(:chat_data) { { id: 3334445550, first_name: "Oleg", type: "private" } }
+    
+    let(:message_data) { 
+      { 
+        "update_id": 666666667,
+        "message": {
+            "message_id": 100,
+            "from": {
+                "id": 3334445550,
+                "is_bot": false,
+                "first_name": "Oleg",
+                "language_code": "ru"
+            },
+            "chat": chat_data,
+            "date": 1693108432,
+            "text": message_content
+        }
+      }
+    }
+
+    it 'queues the ProcessUserMessageJob with correct parameters' do
+      expect {
+        dispatch_message(message_content, chat: chat_data)
+      }.to have_enqueued_job(ProcessUserMessageJob).with(conversation_id: chat_data[:id], content: message_content, bot_id: bot_id)
+    end
+  end
+
   describe '#start!' do
     subject { -> { dispatch_command :start } }
     it { should respond_with_message 'Hi there!' }
@@ -71,12 +109,6 @@ RSpec.describe TelegramWebhooksController, telegram_bot: :rails do
       subject.call
       expect(&fetch).to respond_with_message "You've chosen result ##{payload[:result_id]}"
     end
-  end
-
-  describe '#message' do
-    subject { -> { dispatch_message text } }
-    let(:text) { 'some plain text' }
-    it { should respond_with_message "You wrote: #{text}" }
   end
 
   context 'for unsupported command' do

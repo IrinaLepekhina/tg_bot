@@ -1,0 +1,60 @@
+# telegram_bot_app/docker-stack-git.yml
+version: '3.8' 
+
+services:
+  bot:
+    image: ghcr.io/irinalepekhina/tg_bot:dev
+    ports:
+      - "3001:3000"
+      - "4001:4000"
+    volumes:
+      - .:/usr/src/app
+    env_file:
+      - .env.development
+    networks:
+      - shared_network
+    depends_on:
+      - database_bot
+      - ngrok
+      - redis
+
+  database_bot:
+    image: postgres
+    env_file:
+      - .env.development
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - shared_network
+
+  ngrok:
+    image: ngrok/ngrok
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    command: ["http", "bot:3000"]
+    ports:
+      - "4040:4040"
+    networks:
+      - shared_network
+
+  redis:
+    image: redis/redis-stack:latest 
+    ports:
+      - "6380:6379"
+    networks:
+      - shared_network
+
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    ports:
+      - '8002:8001'
+    volumes:
+      - redisinsight_data:/db
+
+volumes:
+  db_data:
+  redisinsight_data:
+
+networks:
+  shared_network:
+    external: true

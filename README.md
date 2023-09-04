@@ -1,6 +1,10 @@
-# Example telegram bot app
+Welcome to the Telegram Bot App with Docker! 
+This application uses [telegram-bot](https://github.com/telegram-bot-rb/telegram-bot) gem.
 
-This app uses telegram-bot gem.
+## Non-command Messages
+Messages that aren't recognized as commands will be routed to an external API - [Conversational Order Assistant](https://github.com/IrinaLepekhina/planta_chat). This bot integrates with the API, handling actions like registration and login via JWT tokens and managing token storage and retrieval using Redis.
+
+The Conversational Order Assistant will help process the information and guide the conversation accordingly.
 
 ## Commands
 
@@ -15,12 +19,6 @@ This app uses telegram-bot gem.
 - `/last_chosen_inline_result` - Your last chosen inline result
   (Enable feedback with sending `/setinlinefeedback`
   to [@BotFather](https://telegram.me/BotFather)).
-
-By default session is configured to use FileStore at `Rails.root.join('tmp', 'session_store')`.
-To use it in production make sure to share this folder between releases
-(ex., add to list shared of shared folders in capistrano).
-Read more about different session stores in
-[original readme](https://github.com/telegram-bot-rb/telegram-bot#session).
 
 ### Async mode
 

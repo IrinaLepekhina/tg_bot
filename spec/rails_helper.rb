@@ -6,6 +6,12 @@ require File.expand_path('../config/environment', __dir__)
 abort("The Rails environment is running in production mode!") if Rails.env.production?
 require 'rspec/rails'
 require 'telegram/bot/rspec/integration/rails'
+require 'database_cleaner'
+require 'webmock/rspec'
+
+Dir[Rails.root.join('spec/services/**/*.rb')].sort.each { |file| require file }
+Dir[Rails.root.join('spec/jobs/**/*.rb')].sort.each     { |file| require file }
+
 # Add additional requires below this line. Rails is not loaded until this point!
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
@@ -63,5 +69,35 @@ RSpec.configure do |config|
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
 
-  config.after { Telegram.bot.reset }
+  config.include ApplicationHelper
+
+  config.before(:each, type: :system) do
+    driven_by :rack_test
+  end
+
+  config.before(:suite) do
+    DatabaseCleaner.strategy = :transaction
+    DatabaseCleaner.clean_with(:truncation)
+  end
+
+  config.around(:each) do |example|
+    DatabaseCleaner.cleaning do
+      example.run
+    end
+  end
+
+  # config.after { Telegram.bot.reset }
+  # or for multiple bots:
+  config.after { Telegram.bots.each_value(&:reset) }
+
+  config.before(:each) do
+    WebMock.enable!
+  end
+end
+
+Shoulda::Matchers.configure do |config|
+  config.integrate do |with|
+    with.test_framework :rspec
+    with.library :rails
+  end
 end

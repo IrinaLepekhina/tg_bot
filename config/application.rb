@@ -1,6 +1,7 @@
 require_relative "boot"
 
 require "rails/all"
+require 'dotenv/load'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -23,5 +24,10 @@ module TelegramBotApp
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # added
+    # Add additional load paths for your own custom dirs.
+    config.autoload_paths << Rails.root.join('services')
+    config.autoload_paths << Rails.root.join('lib')
   end
 end
