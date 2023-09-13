@@ -3,58 +3,112 @@ version: '3.8'
 
 services:
   bot:
+    image: ghcr.io/irinalepekhina/tg_bot:dev
     build: .
+    container_name: bot
     ports:
       - "3001:3000"
-      - "4001:4000"
     volumes:
       - .:/usr/src/app
     env_file:
-      - .env.development
-    networks:
-      - shared_network
+      - ./env/development/database
+      - ./env/development/web
     depends_on:
-      - database_bot
-      - ngrok
-      - redis
-
-  database_bot:
-    image: postgres
-    env_file:
-      - .env.development
-    volumes:
-      - db_data:/var/lib/postgresql/data
+      bot_redis:
+        condition: service_started
+      ngrok:
+        condition: service_started
     networks:
-      - shared_network
+      - front
 
-  ngrok:
-    image: ngrok/ngrok
-    environment:
-      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
-    command: ["http", "bot:3000"]
-    ports:
-      - "4040:4040"
-    networks:
-      - shared_network
-
-  redis:
-    image: redis/redis-stack:latest 
+  bot_redis:
+    image: redis/redis-stack:latest
+    container_name: bot_redis
     ports:
       - "6380:6379"
     networks:
-      - shared_network
+      - front
 
-  redisinsight:
+  bot_db:
+    image: postgres
+    container_name: bot_db
+    env_file:
+      - ./env/development/database
+    volumes:
+      - db_data_bot:/var/lib/postgresql/data
+    networks:
+      - front
+
+  bot_db_migrator:
+    image: ghcr.io/irinalepekhina/tg_bot:dev
+    container_name:  bot_db_migrator
+    command: ["./wait-for", "--timeout=90", "bot_db:5432", "--",
+      "bin/rails", "db:prepare"]
+    env_file:
+      - ./env/development/database
+      - ./env/development/web
+    networks:
+      - front
+    deploy:
+      restart_policy:
+        condition: none
+
+  bot_webhook:
+    image: ghcr.io/irinalepekhina/tg_bot:dev
+    container_name:  bot_webhook
+    env_file:
+      - ./env/development/database
+      - ./env/development/web
+    command: ["./wait-for", "--timeout=90", "bot:3000", "--",
+      "ruby", "bin/set_telegram_webhook.rb"]
+    networks:
+      - front
+    deploy:
+      restart_policy:
+        condition: none
+        
+  # bot2web_signup:
+  #   image: ghcr.io/irinalepekhina/tg_bot:dev
+  #   container_name:  user_init_bot
+  #   command: ["./wait-for", "--timeout=90", "bot:3000", "--",
+  #     "ruby", "bin/initializing_bot_user.rb"]
+  #   env_file:
+  #     - ./env/development/database
+  #     - ./env/development/web
+  #   networks:
+  #     - front
+  #   deploy:
+  #     restart_policy:
+  #       condition: none
+
+  ngrok:
+    image: ngrok/ngrok
+    container_name:  ngrok
+    env_file:
+      - ./env/development/web
+    command: 
+      - http
+      - "bot:3000"
+      - "--domain=sweet-vital-coral.ngrok-free.app"
+    ports:
+      - "4040:4040"
+    networks:
+      - front
+
+  bot_redisinsight:
     image: redislabs/redisinsight:latest
+    container_name:  bot_redisinsight
     ports:
       - '8002:8001'
     volumes:
-      - redisinsight_data:/db
+      - redisinsight_data_bot:/db
+    networks:
+      - front
 
 volumes:
-  db_data:
-  redisinsight_data:
+  db_data_bot:
+  redisinsight_data_bot:
 
 networks:
-  shared_network:
-    external: true
+  front:
+      external: true

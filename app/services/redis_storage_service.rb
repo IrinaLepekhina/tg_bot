@@ -5,8 +5,8 @@ class RedisStorageService
 
   def initialize(language_service = nil)
     begin
-      @redis = Redis.new(host: "redis", port: 6379)
-      log_info("Successfully initialized Redis connection", host: "redis", port: 6379)
+      @redis = Redis.new(host: "#{ENV['REDIS_HOST_BOT']}", port: "#{ENV['REDIS_PORT_BOT']}".to_i)
+      log_info("Successfully initialized Redis connection")
     rescue => e
       log_exception(e)
       raise e

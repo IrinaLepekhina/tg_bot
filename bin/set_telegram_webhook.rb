@@ -16,13 +16,13 @@ telegram_config = secrets['development']['telegram']['bots'] # Adjust this if yo
 
 puts telegram_config
 
-ngrok_host = ENV['NGROK_HOST']
+host = ENV['NGROK_HOST']
 
-if ngrok_host.nil? || ngrok_host.empty?
-  abort("NGROK_HOST not set. Please run update_env.rb first.")
+if host.nil? || host.empty?
+  abort("HOST not set")
 end
 
-ngrok_url = "https://#{ngrok_host}"
+url = "https://#{host}"
 
 telegram_conn = Faraday.new
 
@@ -31,9 +31,9 @@ telegram_config.each do |bot_name, bot_config, webhook_token|
   webhook_token = bot_config['webhook_token']
   next if token.nil? || token.empty?
 
-  url = "#{ngrok_url}/telegram/#{webhook_token}"
+  webhook_url = "#{url}/telegram/#{webhook_token}"
 
-  response = telegram_conn.get("https://api.telegram.org/bot#{token}/setWebhook", url: url)
+  response = telegram_conn.get("https://api.telegram.org/bot#{token}/setWebhook", url: webhook_url)
 
   puts "Webhook set for bot #{bot_name} to: #{url}"
   puts response.body

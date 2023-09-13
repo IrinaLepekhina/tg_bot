@@ -34,3 +34,4 @@ spec/examples.txt
 config/secrets.yml
 .env*
 .byebug_history
+/env*
