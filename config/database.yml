@@ -4,7 +4,7 @@
 # https://guides.rubyonrails.org/configuring.html#database-pooling
 # https://guides.rubyonrails.org/configuring.html#configuring-a-database
 
-default: &default
+development:
   adapter: postgresql
   encoding: unicode
   host:     <%= ENV['DATABASE_HOST'] %>
@@ -15,12 +15,46 @@ default: &default
   variables:
     statement_timeout: 5000
 
-development:
-  <<: *default
-
 test:
-  <<: *default
+  adapter: postgresql
+  encoding: unicode
+  host:     <%= ENV['DATABASE_HOST'] %>
+  username: <%= ENV['POSTGRES_USER'] %>
+  password: <%= ENV['POSTGRES_PASSWORD'] %>
   database: bot_test
+  pool: 5
+  variables:
+    statement_timeout: 5000
 
 production:
-  <<: *default
+  adapter: postgresql
+  encoding: unicode
+  host:     <%= ENV['DATABASE_HOST'] %>
+  username: <%= ENV['POSTGRES_USER'] %>
+  password: <%= ENV['POSTGRES_PASSWORD'] %>
+  database: <%= ENV['POSTGRES_DB'] %>
+  pool: 5
+  variables:
+    statement_timeout: 5000
+
+
+# default: &default
+#   adapter: postgresql
+#   encoding: unicode
+#   host:     <%= ENV['DATABASE_HOST'] %>
+#   username: <%= ENV['POSTGRES_USER'] %>
+#   password: <%= ENV['POSTGRES_PASSWORD'] %>
+#   database: <%= ENV['POSTGRES_DB'] %>
+#   pool: 5
+#   variables:
+#     statement_timeout: 5000
+
+# development:
+#   <<: *default
+
+# test:
+#   <<: *default
+#   database: chat_test
+
+# production:
+#   <<: *default

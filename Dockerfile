@@ -4,7 +4,7 @@ LABEL maintainer="iralepekhina@gmail.com"
 
 # Allow apt to work with https-based sources
 RUN apt-get update -yqq && \
-    apt-get install -yqq --no-install-recommends nodejs apt-transport-https redis-tools && \
+    apt-get install -yqq --no-install-recommends nodejs apt-transport-https netcat-traditional && \
     # Node setup
     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
     NODE_MAJOR=20 && \
@@ -23,9 +23,13 @@ RUN gem install bundler --conservative && bundle install
 # Copy the rest of the application code into the image
 COPY . /usr/src/app/
 
+RUN ["chmod", "+x", "/usr/src/app/wait-for"]
+
 # Set the entrypoint for the container
 # Ensure Rails tmp/pids/server.pid was cleaned up
 ENTRYPOINT ["./docker-entrypoint.sh"]
+
+EXPOSE 3000
 
 # Set the default command for the container
 CMD ["bin/rails", "s", "-b", "0.0.0.0"]

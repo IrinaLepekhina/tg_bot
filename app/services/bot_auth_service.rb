@@ -3,8 +3,8 @@
 class BotAuthService
   include Loggable
   
-  BASE_URL = "http://web:3000/api"
-
+  BASE_URL =  ENV['WEB_URL']
+  
   def initialize
     log_info("Initializing BotAuthService")
     @storage_service = RedisStorageService.new
@@ -25,26 +25,48 @@ class BotAuthService
   
     jwt_token_present?
   end
+
+  def send_request(endpoint, payload)
+    log_info("Sending request to #{BASE_URL}/#{endpoint}", email: payload.dig(:user, :email) || payload.dig(:auth_params, :email))
+    
+    begin
+        headers = {
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
+        }
+
+        response = Faraday.post("#{BASE_URL}/#{endpoint}", payload.to_json, headers)
+        return response
+    rescue Faraday::ConnectionFailed => e
+        log_error("Connection failed: #{e.message}")
+        return OpenStruct.new(status: 500, body: "Connection failed: #{e.message}")
+    rescue => e
+        log_error("Error sending request: #{e.message}")
+        return OpenStruct.new(status: 500, body: "Error sending request: #{e.message}")
+    end
+  end
   
   def signup(name, email, nickname, password)
-    log_info("Attempting to signup", email: email)
-  
-    response = Faraday.post("#{BASE_URL}/signup", 
-      { user: { name: name, email: email, nickname: nickname, password: password } }.to_json,
-      { 'Content-Type' => 'application/json', 'Accept' => 'application/json' }
-    )
-
+    payload = { 
+      user: { 
+        name: name, 
+        email: email, 
+        nickname: nickname, 
+        password: password 
+      } 
+    }
+    response = send_request('signup', payload)
     handle_response(response)
   end
-
+  
   def login(email, password)
-    log_info("Attempting to login", email: email)
-    
-    response = Faraday.post("#{BASE_URL}/login", 
-      { auth_params: { email: email, password: password } }.to_json,
-      { 'Content-Type' => 'application/json', 'Accept' => 'application/json' }
-    )
-
+    payload = { 
+      auth_params: { 
+        email: email, 
+        password: password 
+      } 
+    }
+    response = send_request('login', payload)
     handle_response(response)
   end
 

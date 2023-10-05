@@ -6,7 +6,7 @@ class ProcessUserMessageJob < ApplicationJob
 
   queue_as :default
 
-  BASE_URL = "http://web:3000/api"
+  BASE_URL =  ENV['WEB_URL']
 
   def perform(**args)
     conversation_id = args[:conversation_id]

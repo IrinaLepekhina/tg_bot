@@ -12,14 +12,23 @@ APP_ROOT = File.expand_path("..", __dir__)
 erb_content = ERB.new(File.read("#{APP_ROOT}/config/secrets.yml")).result
 secrets = YAML.safe_load(erb_content)
 
-telegram_config = secrets['development']['telegram']['bots'] # Adjust this if your environment is different
+# Determine the environment (development or production)
+rails_env = ENV['RAILS_ENV'] || 'development'
+
+telegram_config = if rails_env == 'development'
+  secrets['development']['telegram']['bots']
+elsif rails_env == 'production'
+  secrets['production']['telegram']['bots']
+else
+  raise "Unknown environment: #{rails_env}"
+end
 
 puts telegram_config
 
-host = ENV['NGROK_HOST']
+host = ENV['DEFAULT_HOST']
 
 if host.nil? || host.empty?
-  abort("HOST not set")
+  abort("HOST not set #{ENV['DEFAULT_HOST']}")
 end
 
 url = "https://#{host}"
