@@ -3,6 +3,7 @@ module Api
     class WelcomeController < ApiController
 
       def index
+        render plain: 'Welcome'
       end
     end
   end

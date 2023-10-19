@@ -9,17 +9,17 @@ RSpec.describe BotAuthService do
   # end
 
   before do
-    stub_request(:post, "http://web:3000/api/signup")
-      .with(
-        body: "{\"user\":{\"name\":\"Muul\",\"email\":\"Muul@\",\"nickname\":\"muul_bot\",\"password\":\"password_muul\"}}",
+    stub_request(:post, "http://ai_chat:3000/api/signup").
+      with(
+        body: "{\"user\":{\"name\":\"Muul\",\"email\":\"Muul@diid\",\"nickname\":\"muul_tg_bot\",\"password\":\"password_muul\"}}",
         headers: {
           'Accept'=>'application/json',
           'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
           'Content-Type'=>'application/json',
           'User-Agent'=>'Faraday v2.7.10'
         }
-      )
-      .to_return(status: 200, body: "{\"jwt_token\":\"mocked_jwt_token\"}", headers: {})
+      ).
+      to_return(status: 200, body: "{\"jwt_token\":\"mocked_jwt_token_for_signup\"}", headers: {})
   end
   
   context "when JWT token is not present" do

@@ -11,3 +11,7 @@ tmp/*
 # Editor temp files
 **/.vs
 **/.vscode
+
+config/master.key
+.env*
+/env*

@@ -3,7 +3,7 @@
 class BotAuthService
   include Loggable
   
-  BASE_URL =  ENV['WEB_URL']
+  BASE_URL =  ENV['AI_CHAT_URL'] || "http://ai_chat:3000/api"
   
   def initialize
     log_info("Initializing BotAuthService")
@@ -13,18 +13,48 @@ class BotAuthService
   end
 
   def initialize_bot
-    return true if jwt_token_present? && !token_expired?
-
-    # Attempt to signup first
+    # Logging the start of the initialization process
+    log_info("Starting bot initialization")
+  
+    if jwt_token_present?
+      # Logging the presence of a valid JWT token
+      log_info("JWT token already present and not expired")
+      return true 
+    end
+  
+    # Logging the attempt to sign up the bot
+    log_info("Attempting to signup bot with name: #{ENV['BOT_NAME']}, email: #{ENV['BOT_EMAIL']}")
     signup(ENV['BOT_NAME'], ENV['BOT_EMAIL'], ENV['BOT_NICKNAME'], ENV['BOT_PASSWORD'])
   
-    # If signup didn't work, attempt to login
+    # Logging the condition where sign up failed and trying to log in
     unless jwt_token_present?
+      log_info("Signup failed or JWT token missing. Attempting to login bot with email: #{ENV['BOT_EMAIL']}")
       login(ENV['BOT_EMAIL'], ENV['BOT_PASSWORD'])
     end
   
-    jwt_token_present?
+    # Check again if the JWT token is present
+    if jwt_token_present?
+      log_info("Bot initialization successful with valid JWT token")
+      true
+    else
+      log_error("Bot initialization failed. No JWT token present after signup and login attempts")
+      false
+    end
   end
+  
+  # def initialize_bot
+  #   return true if jwt_token_present? && !token_expired?
+
+  #   # Attempt to signup first
+  #   signup(ENV['BOT_NAME'], ENV['BOT_EMAIL'], ENV['BOT_NICKNAME'], ENV['BOT_PASSWORD'])
+  
+  #   # If signup didn't work, attempt to login
+  #   unless jwt_token_present?
+  #     login(ENV['BOT_EMAIL'], ENV['BOT_PASSWORD'])
+  #   end
+  
+  #   jwt_token_present?
+  # end
 
   def send_request(endpoint, payload)
     log_info("Sending request to #{BASE_URL}/#{endpoint}", email: payload.dig(:user, :email) || payload.dig(:auth_params, :email))

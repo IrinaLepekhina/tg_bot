@@ -46,11 +46,13 @@ Rails.application.configure do
   # config.action_cable.allowed_request_origins = [ "http://example.com", /http:\/\/example.*/ ]
 
   # Force all access to the app over SSL, but allow an exception for internal communications
-  config.force_ssl = true unless ENV['INTERNAL_COMMUNICATION'] == 'true'
+  # config.force_ssl = false #true unless ENV['INTERNAL_COMMUNICATION'] == 'true'
+  config.force_ssl = false
+  config.ssl_options = { redirect: false }
 
   # Include generic and useful information about system operation, but avoid logging too much
   # information to avoid inadvertent exposure of personally identifiable information (PII).
-  config.log_level = :info
+  config.log_level = :debug
 
   # Prepend all log lines with the following tags.
   config.log_tags = [ :request_id ]
@@ -104,6 +106,11 @@ Rails.application.configure do
   }
   
   # If you're behind a proxy like Traefik, trust the forwarded headers.
-  trusted_proxies = ENV.fetch('TRUSTED_PROXIES', '127.0.0.1,::1').split(',')
+  default_proxies = ['127.0.0.1', '::1', '10.0.0.0/8', '172.16.0.0/12']
+  trusted_proxies = ENV.fetch('TRUSTED_PROXIES', '').split(',')
+  
+  # If TRUSTED_PROXIES is not set or empty, use default values
+  trusted_proxies = default_proxies if trusted_proxies.empty?
   config.action_dispatch.trusted_proxies = trusted_proxies
+  
 end

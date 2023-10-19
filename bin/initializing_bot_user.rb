@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # bin/initializing_bot_user.rb
 
-require_relative "../config/environment"
+require_relative '../config/environment'
 
 auth_service = BotAuthService.new
 if auth_service.initialize_bot

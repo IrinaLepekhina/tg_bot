@@ -23,8 +23,6 @@ else
   raise "Unknown environment: #{rails_env}"
 end
 
-puts telegram_config
-
 host = ENV['DEFAULT_HOST']
 
 if host.nil? || host.empty?

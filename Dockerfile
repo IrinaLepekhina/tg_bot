@@ -1,6 +1,6 @@
 # Dockerfile for a Ruby on Rails web application
 FROM ruby:3.2
-LABEL maintainer="iralepekhina@gmail.com"
+LABEL maintainer="lepekhina-irina@yandex.ru"
 
 # Allow apt to work with https-based sources
 RUN apt-get update -yqq && \
