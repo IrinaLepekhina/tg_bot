@@ -27,18 +27,18 @@ services:
         aliases:
           - tg_bot
       deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 3
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.muul_tg_bot.rule=Host(`bot.muul.ru`)"
-        - "traefik.http.routers.muul_tg_bot.service=muul_tg_bot"
-        - "traefik.http.routers.muul_tg_bot.tls.certresolver=le"
-        - "traefik.http.routers.muul_tg_bot.entrypoints=websecure,web"
-        - "traefik.http.services.muul_tg_bot.loadbalancer.server.port=3001"
-        - "traefik.http.services.muul_tg_bot.loadbalancer.passhostheader=true"
+        restart_policy:
+          condition: on-failure
+          delay: 10s
+          max_attempts: 3
+        labels:
+          - "traefik.enable=true"
+          - "traefik.http.routers.muul_tg_bot.rule=Host(`bot.muul.ru`)"
+          - "traefik.http.routers.muul_tg_bot.service=muul_tg_bot"
+          - "traefik.http.routers.muul_tg_bot.tls.certresolver=le"
+          - "traefik.http.routers.muul_tg_bot.entrypoints=websecure,web"
+          - "traefik.http.services.muul_tg_bot.loadbalancer.server.port=3001"
+          - "traefik.http.services.muul_tg_bot.loadbalancer.passhostheader=true"
 
   tg_bot_redis:
     image: redis/redis-stack:7.2.0-v4
