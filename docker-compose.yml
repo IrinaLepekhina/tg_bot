@@ -14,8 +14,8 @@ services:
       - ./database
       - ./tg_bot
     depends_on:
-      tg_bot_redis:
-      ngrok:
+      - tg_bot_redis
+      - ngrok
     networks:
       tg_bot_front:
         aliases:
