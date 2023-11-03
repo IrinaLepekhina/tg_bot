@@ -27,6 +27,6 @@ build-dev:
   tags:
     - swarm
 
-deploy-dev:
-  environment: dev
+deploy-swarm:
+  environment: prod
   extends: .deploy
