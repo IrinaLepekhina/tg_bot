@@ -113,21 +113,21 @@ services:
       restart_policy:
         condition: none
 
-  ngrok:
-    image: ngrok/ngrok:3.3.5-debian
-    container_name:  ngrok
-    env_file:
-      - ./tg_bot
-    command: 
-      - http
-      - "tg_bot:3001"
-      - "--domain=sweet-vital-coral.ngrok-free.app"
-    ports:
-      - "4040:4040"
-    networks:
-      tg_bot_front:
-        aliases:
-          - ngrok
+  # ngrok:
+  #   image: ngrok/ngrok:3.3.5-debian
+  #   container_name:  ngrok
+  #   env_file:
+  #     - ./tg_bot
+  #   command: 
+  #     - http
+  #     - "tg_bot:3001"
+  #     - "--domain=sweet-vital-coral.ngrok-free.app"
+  #   ports:
+  #     - "4040:4040"
+  #   networks:
+  #     tg_bot_front:
+  #       aliases:
+  #         - ngrok
 
   tg_bot_redisinsight:
     image: redislabs/redisinsight:1.14.0
