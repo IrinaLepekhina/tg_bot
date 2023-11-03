@@ -15,6 +15,8 @@ services:
       - ./tg_bot
     depends_on:
       - tg_bot_redis
+    volumes:
+      - .:/usr/src/app
     networks:
       tg_bot_front:
         aliases:
