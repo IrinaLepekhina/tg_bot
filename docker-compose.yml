@@ -9,7 +9,7 @@ services:
       # dockerfile: ./Dockerfile.prod
     container_name: tg_bot
     ports:
-      - "3000"
+      - "3001:3001"
     env_file:
       - ./database
       - ./tg_bot
