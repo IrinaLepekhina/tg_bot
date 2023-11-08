@@ -76,58 +76,42 @@ services:
       restart_policy:
         condition: none
 
-  tg_bot_webhook:
-    image: $CI_REGISTRY_IMAGE:swarm
-    # image: infrastructure-tg_bot
-    container_name:  tg_bot_webhook
-    env_file:
-      - ./database
-      - ./tg_bot
-    command: ["./wait-for", "--timeout=90", "tg_bot:3001", "--",
-      "ruby", "bin/set_telegram_webhook.rb"]
-    networks:
-      tg_bot_front:
-        aliases:
-          - tg_bot_webhook
-    deploy:
-      restart_policy:
-        condition: none
-        
-  tg_bot_signup:
-    image: $CI_REGISTRY_IMAGE:swarm
-    # image: infrastructure-tg_bot
-    container_name:  tg_bot_signup
-    command: ["./wait-for", "--timeout=120", "tg_bot:3001", "--",
-      "rails", "runner", "bin/initializing_bot_user.rb"]
-    env_file:
-      - ./database
-      - ./tg_bot
-    networks:
-      tg_bot_front:
-        aliases:
-          - tg_bot_signup
-      chat_bot:
-        aliases:
-          - tg_bot_signup
-    deploy:
-      restart_policy:
-        condition: none
-
-  # ngrok:
-  #   image: ngrok/ngrok:3.3.5-debian
-  #   container_name:  ngrok
+  # tg_bot_webhook:
+  #   image: $CI_REGISTRY_IMAGE:swarm
+  #   # image: infrastructure-tg_bot
+  #   container_name:  tg_bot_webhook
   #   env_file:
+  #     - ./database
   #     - ./tg_bot
-  #   command: 
-  #     - http
-  #     - "tg_bot:3001"
-  #     - "--domain=sweet-vital-coral.ngrok-free.app"
-  #   ports:
-  #     - "4040:4040"
+  #   command: ["./wait-for", "--timeout=90", "tg_bot:3001", "--",
+  #     "ruby", "bin/set_telegram_webhook.rb"]
   #   networks:
   #     tg_bot_front:
   #       aliases:
-  #         - ngrok
+  #         - tg_bot_webhook
+  #   deploy:
+  #     restart_policy:
+  #       condition: none
+        
+  # tg_bot_signup:
+  #   image: $CI_REGISTRY_IMAGE:swarm
+  #   # image: infrastructure-tg_bot
+  #   container_name:  tg_bot_signup
+  #   command: ["./wait-for", "--timeout=120", "tg_bot:3001", "--",
+  #     "rails", "runner", "bin/initializing_bot_user.rb"]
+  #   env_file:
+  #     - ./database
+  #     - ./tg_bot
+  #   networks:
+  #     tg_bot_front:
+  #       aliases:
+  #         - tg_bot_signup
+  #     chat_bot:
+  #       aliases:
+  #         - tg_bot_signup
+  #   deploy:
+  #     restart_policy:
+  #       condition: none
 
   tg_bot_redisinsight:
     image: redislabs/redisinsight:1.14.0
