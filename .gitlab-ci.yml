@@ -27,7 +27,7 @@ build-swarm:
   script: 
     - echo "$TG_BOT" > tg_bot
     - echo "$TG_DATABASE" > database
-    - docker stack deploy -c docker-compose.yml muul
+    - docker stack deploy -c docker-compose.yml muul --with-registry-auth
     
   tags:
     - swarm
