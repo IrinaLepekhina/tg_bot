@@ -25,6 +25,7 @@ build-swarm:
     - echo "$TG_BOT" > tg_bot
     - echo "$TG_DATABASE" > database
     - docker stack deploy -c docker-compose.yml muul
+    - docker image prune -af
   tags:
     - swarm
 
