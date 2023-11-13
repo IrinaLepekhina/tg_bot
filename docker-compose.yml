@@ -3,7 +3,7 @@ version: '3.8'
 services:
 
   tg_bot:
-    image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    image: $IMAGE
     build:
       context: .
       # dockerfile: ./Dockerfile.prod
@@ -60,7 +60,7 @@ services:
           - tg_bot_db
 
   tg_bot_db_migrator:
-    image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    image: $IMAGE
     # image: infrastructure-tg_bot
     container_name:  tg_bot_db_migrator
     command: ["./wait-for", "--timeout=60", "tg_bot_db:5432", "--",
@@ -77,7 +77,7 @@ services:
         condition: none
 
   tg_bot_webhook:
-    image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    image: $IMAGE
     # image: infrastructure-tg_bot
     container_name:  tg_bot_webhook
     env_file:
@@ -94,7 +94,7 @@ services:
         condition: none
         
   tg_bot_signup:
-    image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    image: $IMAGE
     # image: infrastructure-tg_bot
     container_name:  tg_bot_signup
     command: ["./wait-for", "--timeout=120", "tg_bot:3001", "--",
