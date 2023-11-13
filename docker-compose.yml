@@ -4,9 +4,6 @@ services:
 
   tg_bot:
     image: $IMAGE
-    build:
-      context: .
-      # dockerfile: ./Dockerfile.prod
     container_name: tg_bot
     ports:
       - "3001:3001"

@@ -9,9 +9,9 @@ variables:
 
 build-swarm:
   stage: build
-  before_script:
-    - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
-    - echo "$SECRETS_FILE" > config/secrets.yml
+  # before_script:
+  #   - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
+  #   - echo "$SECRETS_FILE" > config/secrets.yml
   script:
     - docker build -t $IMAGE -t $IMAGE_LATEST -f Dockerfile.prod  .
     - docker push $IMAGE_LATEST
