@@ -35,3 +35,7 @@ config/secrets.yml
 .env*
 .byebug_history
 /env*
+pip_git.sh
+pip_build.sh
+pip_img_delete.sh
+pip_stat.sh

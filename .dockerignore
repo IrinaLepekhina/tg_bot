@@ -15,3 +15,7 @@ tmp/*
 config/master.key
 .env*
 /env*
+pip_git.sh
+pip_build.sh
+pip_img_delete.sh
+pip_stat.sh
