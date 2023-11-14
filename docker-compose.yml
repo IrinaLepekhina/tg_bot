@@ -1,12 +1,9 @@
-version: '3.8' 
+version: '3.8'
 
 services:
 
   tg_bot:
     image: ghcr.io/irinalepekhina/tg_bot:dev
-    build:
-      context: .
-      # dockerfile: ./Dockerfile.prod
     container_name: tg_bot
     ports:
       - "3001:3001"
@@ -16,6 +13,8 @@ services:
       - ./env/development/database
       - ./env/development/tg_bot
     depends_on:
+      tg_bot_sidekiq:
+        condition: service_started
       tg_bot_redis:
         condition: service_started
       ngrok:
@@ -24,11 +23,30 @@ services:
       - tg_bot_front
       - chat_bot
 
+  tg_bot_sidekiq:
+    image: ghcr.io/irinalepekhina/tg_bot:dev
+    container_name: tg_bot_sidekiq
+    command: ["bundle", "exec", "sidekiq"]
+    env_file:
+      - ./env/development/tg_bot
+    depends_on: 
+      tg_bot_db:
+        condition: service_started
+      tg_bot_redis:
+        condition: service_started
+    networks:
+      - tg_bot_front
+      - chat_bot
+    volumes:
+      - .:/usr/src/app
+
+# shared for 2 services
   tg_bot_redis:
     image: redis/redis-stack:latest
     container_name: tg_bot_redis
     networks:
       - tg_bot_front
+      - tg_bot_listener
 
   tg_bot_db:
     image: postgres
@@ -42,7 +60,6 @@ services:
 
   tg_bot_db_migrator:
     image: ghcr.io/irinalepekhina/tg_bot:dev
-    # image: infrastructure-tg_bot
     container_name:  tg_bot_db_migrator
     command: ["./wait-for", "--timeout=60", "tg_bot_db:5432", "--",
       "bin/rails", "db:prepare"]
@@ -57,34 +74,32 @@ services:
 
   tg_bot_webhook:
     image: ghcr.io/irinalepekhina/tg_bot:dev
-    # image: infrastructure-tg_bot
     container_name:  tg_bot_webhook
     env_file:
       - ./env/development/database
       - ./env/development/tg_bot
     command: ["./wait-for", "--timeout=90", "tg_bot:3001", "--",
-      "ruby", "bin/set_telegram_webhook.rb"]
+      "bundle", "exec", "rake", "telegram:set_webhook"]
     networks:
       - tg_bot_front
     deploy:
       restart_policy:
         condition: none
         
-  tg_bot_signup:
-    image: ghcr.io/irinalepekhina/tg_bot:dev
-    # image: infrastructure-tg_bot
-    container_name:  tg_bot_signup
-    command: ["./wait-for", "--timeout=120", "tg_bot:3001", "--",
-      "rails", "runner", "bin/initializing_bot_user.rb"]
-    env_file:
-      - ./env/development/database
-      - ./env/development/tg_bot
-    networks:
-      - tg_bot_front
-      - chat_bot
-    deploy:
-      restart_policy:
-        condition: none
+  # tg_bot_signup:
+  #   image: ghcr.io/irinalepekhina/tg_bot:dev
+  #   container_name:  tg_bot_signup
+  #   command: ["./wait-for", "--timeout=120", "tg_bot:3001", "--",
+  #     "bundle", "exec", "rake", "bot:initialize_user"]
+  #   env_file:
+  #     - ./env/development/database
+  #     - ./env/development/tg_bot
+  #   networks:
+  #     - tg_bot_front
+  #     - chat_bot
+  #   deploy:
+  #     restart_policy:
+  #       condition: none
 
   ngrok:
     image: ngrok/ngrok
@@ -94,7 +109,7 @@ services:
     command: 
       - http
       - "tg_bot:3001"
-      - "--domain=sweet-vital-coral.ngrok-free.app"
+      - "--domain=awake-javelin-previously.ngrok-free.app"
     ports:
       - "4040:4040"
     networks:
@@ -118,5 +133,9 @@ networks:
   tg_bot_front:
     driver: bridge
     name:   tg_bot_front
+  tg_bot_listener:
+    driver: bridge
+    name:   tg_bot_listener
   chat_bot:
-    external: true
+    driver: bridge
+    name:   chat_bot
