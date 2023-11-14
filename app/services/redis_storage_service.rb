@@ -3,9 +3,9 @@
 class RedisStorageService
   include Loggable
 
-  def initialize(language_service = nil)
+  def initialize
     begin
-      @redis = Redis.new(host: "#{ENV['REDIS_HOST_BOT']}", port: "#{ENV['REDIS_PORT_BOT']}".to_i)
+      @redis = Redis.new(host: "#{ENV['REDIS_HOST']}", port: "#{ENV['REDIS_PORT']}".to_i)
       log_info("Successfully initialized Redis connection")
     rescue => e
       log_exception(e)
