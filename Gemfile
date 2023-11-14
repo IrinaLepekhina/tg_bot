@@ -40,6 +40,11 @@ gem 'openai'
 gem 'ruby-openai'
 gem 'enumerize' 
 gem 'redi_search' 
+gem 'sidekiq'
+gem 'bunny'
+gem 'dry-validation'
+gem 'dry-transaction'
+
 
 # good gems:
 # gem letter_opener
@@ -84,7 +89,8 @@ group :test do
   gem 'selenium-webdriver'
   gem 'webdrivers'
   gem 'faker'
-  gem 'webmock'
+  gem 'webmock' 
+  gem 'rspec-sidekiq'
 end
 
 group :pry do

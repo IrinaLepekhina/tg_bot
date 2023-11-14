@@ -1,3 +1,5 @@
+# app/controllers/telegram_muul_webhooks_controller.rb
+
 class TelegramMuulWebhooksController < Telegram::Bot::UpdatesController
   include Telegram::Bot::UpdatesController::MessageContext
 
@@ -5,11 +7,14 @@ class TelegramMuulWebhooksController < Telegram::Bot::UpdatesController
 
   def message(message_data)
     log_info("Received a Telegram message")
-    
-    extracted_details = extract_message_details(message_data)
-    
-    log_info("Send to Job")
-    ProcessUserMessageJob.perform_later(**extracted_details)
+    extracted_details = extract_message_details(message_data).to_h
+      
+    log_info("Process the message using WebhookMessageTransaction")
+    result = WebhookMessageTransaction.new.call(extracted_details)
+
+    if result.failure?
+      log_error("Error: #{result.failure}")
+    end
   end
 
   def start!(*)
@@ -120,15 +125,19 @@ class TelegramMuulWebhooksController < Telegram::Bot::UpdatesController
   private
 
   def extract_message_details(message_data)
-    log_info("Extracting details from message data")
+
+    log_info("Extracting details from message data: #{message_data}")
+    puts "Extracting from message data: #{message_data}"
 
     chat_id = message_data['chat']['id']
-    text = message_data['text']
+    text    = message_data['text']
+    date    = message_data['date']
 
     details = {
       conversation_id: chat_id,
       content: text,
-      bot_id: 'muul'
-    }
+      bot_id: 'muul',
+      date: date
+    }.with_indifferent_access
   end
 end

@@ -11,6 +11,7 @@ require 'webmock/rspec'
 
 Dir[Rails.root.join('spec/services/**/*.rb')].sort.each { |file| require file }
 Dir[Rails.root.join('spec/jobs/**/*.rb')].sort.each     { |file| require file }
+Dir[Rails.root.join('spec/transactions/**/*.rb')].sort.each { |file| require file }
 
 # Add additional requires below this line. Rails is not loaded until this point!
 
@@ -93,6 +94,14 @@ RSpec.configure do |config|
   config.before(:each) do
     WebMock.enable!
   end
+
+  config.before(:each) do
+    Sidekiq::Worker.clear_all
+  end
+
+  Sidekiq::Testing.fake! # or Sidekiq::Testing.inline!
+
+  config.include FactoryBot::Syntax::Methods
 end
 
 Shoulda::Matchers.configure do |config|
@@ -100,4 +109,8 @@ Shoulda::Matchers.configure do |config|
     with.test_framework :rspec
     with.library :rails
   end
+end
+
+RSpec::Sidekiq.configure do |config|
+  config.warn_when_jobs_not_processed_by_sidekiq = false
 end

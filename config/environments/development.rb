@@ -73,5 +73,7 @@ Rails.application.configure do
   # Use memory store for bot sessions.
   config.telegram_updates_controller.session_store = :memory_store
 
-  config.hosts << "sweet-vital-coral.ngrok-free.app"
+  config.hosts << "awake-javelin-previously.ngrok-free.app"
+
+  config.active_job.queue_adapter = :sidekiq
 end

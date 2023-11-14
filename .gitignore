@@ -32,6 +32,11 @@
 
 spec/examples.txt
 config/secrets.yml
-.env*
 .byebug_history
+.env*
 /env*
+
+pip_git.sh
+pip_build.sh
+pip_img_delete.sh
+pip_stat.sh

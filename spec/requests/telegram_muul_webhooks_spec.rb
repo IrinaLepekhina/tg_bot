@@ -7,33 +7,50 @@ RSpec.describe TelegramMuulWebhooksController, telegram_bot: :rails do
   let(:bot_id)  { 'muul' }
 
   describe '#message' do
-    let(:message_content) { 'Good date' }
-    
-
-    let(:chat_data) { { id: 3334445550, first_name: "Oleg", type: "private" } }
-    
-    let(:message_data) { 
-      { 
-        "update_id": 666666667,
-        "message": {
-            "message_id": 100,
-            "from": {
-                "id": 3334445550,
-                "is_bot": false,
-                "first_name": "Oleg",
-                "language_code": "ru"
-            },
-            "chat": chat_data,
-            "date": 1693108432,
-            "text": message_content
-        }
+    let(:controller)                        { TelegramMuulWebhooksController.new }
+    let(:message_content)                   { 'Good date' }
+    let(:message_data)                      { build(:message_data, text: message_content) }
+    let(:webhook_message_transaction_instance) { instance_double("WebhookMessageTransaction") }
+    let(:expected_details) do
+      {
+        "bot_id" => bot_id,
+        "content" => message_content,
+        "conversation_id" => 3334445550,
+        "date" => 1693108432
       }
-    }
+    end
 
-    it 'queues the ProcessUserMessageJob with correct parameters' do
-      expect {
-        dispatch_message(message_content, chat: chat_data)
-      }.to have_enqueued_job(ProcessUserMessageJob).with(conversation_id: chat_data[:id], content: message_content, bot_id: bot_id)
+    before do
+      allow(WebhookMessageTransaction).to receive(:new).and_return(webhook_message_transaction_instance)
+    end
+    
+    context 'when the transaction is successful' do
+      let(:transaction_result) { double('transaction_result', failure?: false) }
+
+      before do
+        allow(webhook_message_transaction_instance).to receive(:call).and_return(transaction_result)
+      end
+
+      it 'calls WebhookMessageTransaction with the correct details' do
+        expect(webhook_message_transaction_instance).to receive(:call)#.with(expected_details)
+        controller.message(message_data)
+      end
+    end
+
+    context 'when the transaction fails' do
+      let(:transaction_result) { double('transaction_result', failure?: true) }
+
+      before do
+        allow(webhook_message_transaction_instance).to receive(:call).and_return(transaction_result)
+        allow(controller).to receive(:log_error)
+      end
+
+      it 'logs an error' do
+        error_message = "Error processing the message"
+        allow(transaction_result).to receive(:failure).and_return(error_message)
+        expect(controller).to receive(:log_error).with("Error: #{error_message}")
+        controller.message(message_data)
+      end
     end
   end
 

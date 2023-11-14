@@ -1,3 +1,5 @@
+# config/application.rb
+
 require_relative "boot"
 
 require "rails/all"
@@ -29,5 +31,7 @@ module TelegramBotApp
     # Add additional load paths for your own custom dirs.
     config.autoload_paths << Rails.root.join('services')
     config.autoload_paths << Rails.root.join('lib')
+    config.autoload_paths << Rails.root.join('transactions')
+    config.autoload_paths << Rails.root.join('contracts')
   end
 end

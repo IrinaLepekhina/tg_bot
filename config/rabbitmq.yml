@@ -1,0 +1,21 @@
+# config/rabbitmq.yml
+development:
+  hostname: <%= ENV['BUNNY_HOST'] %>
+  port:     <%= ENV['BUNNY_PORT'] %>
+  vhost: 'dev_vhost'
+  username: 'guest'
+  password: 'guest'
+
+test:
+  hostname: <%= ENV['BUNNY_HOST'] %>
+  port:     <%= ENV['BUNNY_PORT'] %>
+  vhost: 'test_vhost'
+  username: 'guest'
+  password: 'guest'
+
+production:
+  hostname: <%= ENV['BUNNY_HOST'] %>
+  port:     <%= ENV['BUNNY_PORT'] %>
+  vhost:    'prod_vhost'
+  username: 'guest'
+  password: 'guest'

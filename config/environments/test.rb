@@ -66,4 +66,6 @@ Rails.application.configure do
   Telegram::Bot::ClientStub.stub_all!
 
   config.hosts << "www.example.com"
+
+  config.active_job.queue_adapter = :test
 end
