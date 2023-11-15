@@ -1,17 +1,20 @@
-version: '3.8' 
+version: '3.8'
 
 services:
 
   tg_bot:
-    image: $IMAGE
+    image: ghcr.io/irinalepekhina/tg_bot:latest
     container_name: tg_bot
     ports:
-      - "3001"
+      - "3001:3001"
+    volumes:
+      - .:/usr/src/app
     env_file:
-      - ./database
-      - ./tg_bot
+      - ./env/development/database
+      - ./env/development/tg_bot
     depends_on:
       - tg_bot_redis
+      - ngrok
     networks:
       tg_bot_front:
         aliases:
@@ -19,22 +22,6 @@ services:
       chat_bot:
         aliases:
           - tg_bot
-      proxy_main:
-        aliases:
-          - tg_bot
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 3
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.muul_tg_bot.rule=Host(`bot.muul.ru`)"
-        - "traefik.http.routers.muul_tg_bot.service=muul_tg_bot"
-        - "traefik.http.routers.muul_tg_bot.tls.certresolver=le"
-        - "traefik.http.routers.muul_tg_bot.entrypoints=websecure,web"
-        - "traefik.http.services.muul_tg_bot.loadbalancer.server.port=3001"
-        - "traefik.http.services.muul_tg_bot.loadbalancer.passhostheader=true"
 
   tg_bot_redis:
     image: redis/redis-stack:7.2.0-v4
@@ -48,7 +35,7 @@ services:
     image: postgres:16
     container_name: tg_bot_db
     env_file:
-      - ./database
+      - ./env/development/database
     volumes:
       - db_data_tg_bot:/var/lib/postgresql/data
     networks:
@@ -57,45 +44,39 @@ services:
           - tg_bot_db
 
   tg_bot_db_migrator:
-    image: $IMAGE
+    image: ghcr.io/irinalepekhina/tg_bot:latest
     container_name:  tg_bot_db_migrator
     command: ["./wait-for", "--timeout=60", "tg_bot_db:5432", "--",
       "bin/rails", "db:prepare"]
     env_file:
-      - ./database
-      - ./tg_bot
+      - ./env/development/database
+      - ./env/development/tg_bot
     networks:
       tg_bot_front:
         aliases:
           - tg_bot_db_migrator
-    deploy:
-      restart_policy:
-        condition: none
 
   tg_bot_webhook:
-    image: $IMAGE
+    image: ghcr.io/irinalepekhina/tg_bot:latest
     container_name:  tg_bot_webhook
     env_file:
-      - ./database
-      - ./tg_bot
+      - ./env/development/database
+      - ./env/development/tg_bot
     command: ["./wait-for", "--timeout=90", "tg_bot:3001", "--",
       "bundle", "exec", "rake", "telegram:set_webhook"]
     networks:
       tg_bot_front:
         aliases:
           - tg_bot_webhook
-    deploy:
-      restart_policy:
-        condition: none
         
   tg_bot_signup:
-    image: $IMAGE
+    image: ghcr.io/irinalepekhina/tg_bot:latest
     container_name:  tg_bot_signup
     command: ["./wait-for", "--timeout=120", "tg_bot:3001", "--",
       "bundle", "exec", "rake", "bot:initialize_user"]
     env_file:
-      - ./database
-      - ./tg_bot
+      - ./env/development/database
+      - ./env/development/tg_bot
     networks:
       tg_bot_front:
         aliases:
@@ -103,18 +84,40 @@ services:
       chat_bot:
         aliases:
           - tg_bot_signup
-    deploy:
-      restart_policy:
-        condition: none
+
+  tg_bot_redisinsight:
+    image: redislabs/redisinsight:1.14.0
+    container_name:  tg_bot_redisinsight
+    ports:
+      - '8002:8001'
+    volumes:
+      - redisinsight_data_tg_bot:/db
+    networks:
+      tg_bot_front:
+        aliases:
+          - tg_bot_redisinsight
+
+  ngrok:
+    image: ngrok/ngrok
+    container_name:  ngrok
+    env_file:
+          - ./env/development/tg_bot
+    command: 
+      - http
+      - "tg_bot:3001"
+      - "--domain=awake-javelin-previously.ngrok-free.app"
+    ports:
+      - "4040:4040"
+    networks:
+      - tg_bot_front
 
 volumes:
   db_data_tg_bot:
+  redisinsight_data_tg_bot:
 
 networks:
   tg_bot_front:
-    driver: overlay
+    driver: bridge
     name:   tg_bot_front
   chat_bot:
-    external: true
-  proxy_main:
     external: true

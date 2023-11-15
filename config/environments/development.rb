@@ -73,5 +73,7 @@ Rails.application.configure do
   # Use memory store for bot sessions.
   config.telegram_updates_controller.session_store = :memory_store
 
-  config.hosts << "sweet-vital-coral.ngrok-free.app"
+  # Fetch the host from the environment variable, or use a default if it's not set
+  default_host = ENV['DEFAULT_HOST'] || 'default-host.com'
+  Rails.application.config.hosts << default_host
 end
